@@ -42,8 +42,6 @@ import com.jnngl.vanillaminimaps.map.renderer.world.provider.MinimapWorldRendere
 import com.jnngl.vanillaminimaps.storage.MinimapPlayerDatabase;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.bstats.bukkit.Metrics;
-import org.bstats.charts.SimplePie;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -58,7 +56,6 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -110,10 +107,10 @@ public final class VanillaMinimaps extends JavaPlugin implements MinimapProvider
     Config.instance().reload(dataPath.resolve("config.yml"));
     BlockConfig.instance().reload(dataPath.resolve("blocks.yml"));
 
-    Metrics metrics = new Metrics(this, 20833);
+    /*Metrics metrics = new Metrics(this, 20833);
     metrics.addCustomChart(new SimplePie("minimap_renderer", () -> Config.instance().defaultMinimapRenderer));
     metrics.addCustomChart(new SimplePie("default_position", () -> Config.instance().defaultPosition.toString().toLowerCase(Locale.ROOT)));
-    metrics.addCustomChart(new SimplePie("enabled_by_default", () -> String.valueOf(Config.instance().enabledByDefault)));
+    metrics.addCustomChart(new SimplePie("enabled_by_default", () -> String.valueOf(Config.instance().enabledByDefault)));*/
 
     Path iconsPath = dataPath.resolve("icons");
     Files.createDirectories(iconsPath);
