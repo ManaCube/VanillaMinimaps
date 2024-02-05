@@ -34,6 +34,6 @@ public interface WorldMinimapRenderer extends MinimapLayerRenderer {
   @Override
   default void render(Minimap minimap, MinimapLayer layer, byte[] data) {
     Player player = minimap.holder();
-    renderFully(player.getWorld(), Mth.floor(player.getX()) - 64, Mth.floor(player.getZ()) - 64, data);
+    renderFully(player.getWorld(), Mth.floor(player.getLocation().getX()) - 64, Mth.floor(player.getLocation().getZ()) - 64, data);
   }
 }

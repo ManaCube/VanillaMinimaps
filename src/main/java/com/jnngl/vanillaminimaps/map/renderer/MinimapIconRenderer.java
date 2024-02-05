@@ -67,8 +67,8 @@ public record MinimapIconRenderer(MinimapIcon icon, @Nullable MinimapIcon fullsc
     int worldX = layer.base().getPositionX();
     int worldZ = layer.base().getPositionZ();
     if (!layer.base().isTrackLocation()) {
-      worldX += (int) (minimap.getHolder().getX() - 64);
-      worldZ += (int) (minimap.getHolder().getZ() - 64);
+      worldX += (int) (minimap.getHolder().getLocation().getX() - 64);
+      worldZ += (int) (minimap.getHolder().getLocation().getZ() - 64);
     }
 
     int mapX = worldX - (chunkX << 7);

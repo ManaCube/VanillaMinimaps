@@ -184,8 +184,8 @@ public class FullscreenMinimap {
 
     int halfSegmentsX = segmentsX / 2;
     int halfSegmentsZ = segmentsZ / 2;
-    int startX = (int) minimap.holder().getX() >> 7;
-    int startZ = (int) minimap.holder().getZ() >> 7;
+    int startX = (int) minimap.holder().getLocation().getX() >> 7;
+    int startZ = (int) minimap.holder().getLocation().getZ() >> 7;
     for (int x = startX - halfSegmentsX; x <= startX + halfSegmentsX; x++) {
       for (int z = startZ - halfSegmentsZ; z <= startZ + halfSegmentsZ; z++) {
         MinimapLayer baseLayer = provider.clientsideMinimapFactory().createMinimapLayer(world, primaryRenderer);
@@ -197,8 +197,8 @@ public class FullscreenMinimap {
       int worldX = value.getPositionX();
       int worldZ = value.getPositionZ();
       if (!value.isTrackLocation()) {
-        worldX += (int) (minimap.holder().getX() - 64);
-        worldZ += (int) (minimap.holder().getZ() - 64);
+        worldX += (int) (minimap.holder().getLocation().getX() - 64);
+        worldZ += (int) (minimap.holder().getLocation().getZ() - 64);
       }
       worldX >>= 7;
       worldZ >>= 7;

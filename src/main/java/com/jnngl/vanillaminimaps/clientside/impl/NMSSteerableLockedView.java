@@ -22,11 +22,11 @@ import com.jnngl.vanillaminimaps.VanillaMinimaps;
 import com.jnngl.vanillaminimaps.clientside.SteerableLockedView;
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.*;
+import java.lang.reflect.Field;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -34,8 +34,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -63,34 +63,36 @@ public class NMSSteerableLockedView implements SteerableLockedView {
     this.player = player;
 
     ServerLevel level = ((CraftWorld) player.getWorld()).getHandle();
-    this.viewer = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "_"), ClientInformation.createDefault());
+    this.viewer = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "_"));
     this.viewer.setInvisible(true);
     this.viewer.setNoGravity(true);
     this.viewer.setSilent(true);
-    this.viewer.setPos(player.getX(), Math.floor(player.getY()), player.getZ());
-    this.viewer.setRot(player.getYaw(), player.getPitch());
+    this.viewer.setPos(player.getLocation().getX(), Math.floor(player.getLocation().getY()), player.getLocation().getZ());
+    this.viewer.setRot(player.getLocation().getYaw(), player.getLocation().getPitch());
     this.viewer.passengers = ImmutableList.of(((CraftPlayer) player).getHandle());
+    this.viewer.latency = 0;
     this.origin = player.getLocation();
 
     ServerPlayer serverPlayer = ((CraftPlayer) player).getHandle();
     ServerGamePacketListenerImpl connection = serverPlayer.connection;
-    connection.send(new ClientboundPlayerInfoUpdatePacket(
-        EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER), List.of(
-        new ClientboundPlayerInfoUpdatePacket.Entry(
-            viewer.getUUID(), viewer.getGameProfile(),
-            false, 0, GameType.CREATIVE, null, null)
-    )));
+    connection.send(createPlayerInfoPacket(
+			ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER,
+		    new ClientboundPlayerInfoUpdatePacket.Entry(
+				    viewer.getUUID(), viewer.getGameProfile(),
+				    false, 0, GameType.CREATIVE, null, null
+		    )
+    ));
     connection.send(viewer.getAddEntityPacket());
-    connection.send(new ClientboundRotateHeadPacket(viewer, convertAngle(player.getYaw())));
+    connection.send(new ClientboundRotateHeadPacket(viewer, convertAngle(player.getLocation().getYaw())));
     List<SynchedEntityData.DataValue<?>> metadata = viewer.getEntityData().getNonDefaultValues();
     if (metadata != null && !metadata.isEmpty()) {
       connection.send(new ClientboundSetEntityDataPacket(viewer.getId(), metadata));
     }
 
-    connection.send(new ClientboundPlayerInfoUpdatePacket(
-        EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE),
-        new ClientboundPlayerInfoUpdatePacket.Entry(serverPlayer.getUUID(), null, true, 0, GameType.ADVENTURE, null, null))
-    );
+    connection.send(createPlayerInfoPacket(
+		    ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE,
+		    new ClientboundPlayerInfoUpdatePacket.Entry(serverPlayer.getUUID(), null, true, 0, GameType.ADVENTURE, null, null)
+    ));
     connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.CHANGE_GAME_MODE, GameType.SPECTATOR.getId()));
 
     inject(connection.connection.channel);
@@ -200,8 +202,8 @@ public class NMSSteerableLockedView implements SteerableLockedView {
     connection.send(new ClientboundContainerSetContentPacket(
         0, stateId, serverPlayer.inventoryMenu.remoteSlots, serverPlayer.inventoryMenu.getCarried()));
 
-    connection.send(new ClientboundPlayerInfoUpdatePacket(
-        EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE),
+    connection.send(createPlayerInfoPacket(
+			ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE,
         new ClientboundPlayerInfoUpdatePacket.Entry(serverPlayer.getUUID(), null, true, 0, serverPlayer.gameMode.getGameModeForPlayer(), null, null))
     );
     connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.CHANGE_GAME_MODE, serverPlayer.gameMode.getGameModeForPlayer().getId()));
@@ -210,5 +212,22 @@ public class NMSSteerableLockedView implements SteerableLockedView {
       player.teleport(origin);
       deject(connection.connection.channel);
     });
+  }
+
+  private ClientboundPlayerInfoUpdatePacket createPlayerInfoPacket(ClientboundPlayerInfoUpdatePacket.Action action, ClientboundPlayerInfoUpdatePacket.Entry entry) {
+    ClientboundPlayerInfoUpdatePacket packet = new ClientboundPlayerInfoUpdatePacket(
+            EnumSet.of(action),
+            Collections.emptyList()
+    );
+
+    try {
+        Field field = packet.getClass().getDeclaredField("b");
+        field.setAccessible(true);
+        field.set(packet, Collections.singletonList(entry));
+    } catch (Throwable e) {
+        e.printStackTrace();
+    }
+
+    return packet;
   }
 }

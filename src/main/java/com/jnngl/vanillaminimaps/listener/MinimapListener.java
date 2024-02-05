@@ -102,19 +102,19 @@ public class MinimapListener implements Listener {
 
     if (worldRenderer instanceof CacheableWorldMinimapRenderer cacheable) {
       cacheable.getWorldMapCache().setCallback(player.getUniqueId(), area -> {
-        if (area.x() >= player.getX() - 64 && area.y() >= player.getZ() - 64 &&
-            area.x() + area.z() <= player.getX() + 64 && area.y() + area.w() <= player.getZ() + 64 &&
+        if (area.x() >= player.getLocation().getX() - 64 && area.y() >= player.getLocation().getZ() - 64 &&
+            area.x() + area.z() <= player.getLocation().getX() + 64 && area.y() + area.w() <= player.getLocation().getZ() + 64 &&
             requestedUpdates.add(player.getUniqueId())) {
           Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
             if (requestedUpdates.remove(player.getUniqueId())) {
-              minimap.update(plugin, player.getX(), player.getZ(), false);
+              minimap.update(plugin, player.getLocation().getX(), player.getLocation().getZ(), false);
             }
           });
         }
       });
     }
 
-    minimap.update(plugin, player.getX(), player.getZ(), true);
+    minimap.update(plugin, player.getLocation().getX(), player.getLocation().getZ(), true);
     return minimap;
   }
 

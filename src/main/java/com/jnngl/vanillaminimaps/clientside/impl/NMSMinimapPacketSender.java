@@ -30,7 +30,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Collections;
@@ -64,7 +64,7 @@ public class NMSMinimapPacketSender extends AbstractMinimapPacketSender {
   }
 
   public void spawnFixedLayer(Player viewer, MinimapLayer layer) {
-    boolean upper = viewer.getPitch() > -30.0F;
+    boolean upper = viewer.getLocation().getPitch() > -30.0F;
     double offset = !upper ? 3.0 : 1.0;
     EntityHandle<?> handle = upper ? layer.upperFrame() : layer.lowerFrame();
     ItemFrame frame = (ItemFrame) handle.entity();

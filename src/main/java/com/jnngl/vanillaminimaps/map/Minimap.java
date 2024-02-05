@@ -131,14 +131,14 @@ public final class Minimap {
   }
 
   public void update(MinimapProvider provider) {
-    update(provider, holder.getX(), holder.getZ(), false);
+    update(provider, holder.getLocation().getX(), holder.getLocation().getZ(), false);
   }
 
   public void respawn(MinimapProvider provider) {
     MinimapPacketSender packetSender = provider.packetSender();
     packetSender.despawnMinimap(this);
     packetSender.spawnMinimap(this);
-    update(provider, holder.getX(), holder.getZ(), true);
+    update(provider, holder.getLocation().getX(), holder.getLocation().getZ(), true);
   }
 
   public void resetDeathPoint(MinimapProvider provider) {

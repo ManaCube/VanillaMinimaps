@@ -37,9 +37,9 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.MapColor;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import org.bukkit.craftbukkit.v1_20_R1.CraftWorld;
 
 public class VanillaWorldMinimapRenderer implements CacheableWorldMinimapRenderer {
 
